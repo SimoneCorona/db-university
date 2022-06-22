@@ -2,10 +2,19 @@
 require_once __DIR__ . "/database.php";
 require_once __DIR__ . "/Department.php";
 
-$id = $_GET["id"];
-$sql = "SELECT * FROM `departments` WHERE `id`=$id;";
-$result = $conn->query($sql);
 
+// $id = $_GET["id"];
+// $sql = "SELECT * FROM `departments` WHERE `id`=$id;";
+// $result = $conn->query($sql);
+
+//OPPURE (senza problema sql injection):
+
+$stmt = $conn->prepare("SELECT * FROM `departments` WHERE `id`=?;");
+$stmt->bind_param('d', $id);
+$id = $_GET["id"];
+
+$stmt->execute();
+$result = $stmt->get_result();
 $departments = [];
 
 if ($result && $result->num_rows > 0) {
@@ -37,8 +46,9 @@ if ($result && $result->num_rows > 0) {
     <p><?php echo $department->head_of_department; ?></p>
     <h2>Contatti</h2>
     <ul>
-        <?php foreach($department->getContactsAsArry() as $key=> $value ) { ?>
+        <?php foreach($department->getContactsAsArray() as $key=> $value ) { ?>
         <li><?php echo "$key: $value" ?></li>
+        <?php } ?>
     </ul>
 <?php } ?>
 </body>
